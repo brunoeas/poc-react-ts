@@ -7,18 +7,18 @@ import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 const theme = createMuiTheme({
   palette: {
     primary: {
-      main: '#474747'
-    }
+      main: '#474747',
+    },
   },
   overrides: {
     MuiInput: {
       underline: {
         '&:hover:not($disabled):not($focused):not($error):before': {
-          borderBottomColor: '#474747'
-        }
-      }
-    }
-  }
+          borderBottomColor: '#474747',
+        },
+      },
+    },
+  },
 });
 
 ReactDOM.render(

@@ -1,22 +1,36 @@
 import React from 'react';
-import FileModel from '../../models/file';
+import ArquivoModel from '../../models/arquivo';
 import { Paper } from '@material-ui/core';
 import { styles } from './card-file-styles';
 import { withStyles } from '@material-ui/core/styles';
+import { extractFileExtension } from '../../utils/utils';
+
+const reactFileIcon = require('react-file-icon');
+const FileIcon = reactFileIcon.default;
+
+type PropsType = { file: ArquivoModel; classes: any };
 
 /**
  * Componente para exibir um Card com os dados de um arquivo
  *
  * @author Bruno Eduardo <bruno.soares@kepha.com.br>
- * @param {{ file: FileModel }} props - Props
+ * @param {PropsType} props - Props
  * @returns {JSX.Element}
  */
-function CardFile(props: { file: FileModel; classes: any }): JSX.Element {
+function CardFile(props: PropsType): JSX.Element {
   const { file, classes } = props;
+
+  const extension = extractFileExtension(file.nmArquivo);
 
   return (
     <Paper elevation={8} className={classes.container}>
-      <div className={classes.nomeArquivo}>{file.nmFile}</div>
+      <div className={classes.containerIconeArquivo}>
+        <FileIcon {...reactFileIcon.defaultStyles[extension]} extension={extension} size={120} />
+        {/* TODO: testar com uma extensao que nao existe */}
+      </div>
+
+      <div className={classes.nomeArquivo}>{file.nmArquivo}</div>
+      {/* TODO: fazer estilo para cortar nome quando for mto grande */}
     </Paper>
   );
 }

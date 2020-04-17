@@ -1,16 +1,18 @@
 /**
- * Converte um File para Base64
+ * Clona o array passado por parâmetro
  *
  * @author Bruno Eduardo <bruno.soares@kepha.com.br>
- * @param {File} file - File que vai ser convertido
- * @returns {(Promise<string | null>)}
+ * @template T - Tipo do array
+ * @param {T[]} [array=[]] - Array que vai ser clonado
+ * @returns {T[]} Array clonado
  */
-async function fileToBase64(file: File): Promise<string | null> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => (typeof reader.result === 'string' ? resolve(reader.result) : reject(null));
-    reader.readAsDataURL(file);
-  });
+function cloneArray<T>(array: T[] = []): T[] {
+  return [...array];
 }
 
-export { fileToBase64 };
+function extractFileExtension(fileName: string): string {
+  const pointIndex = fileName.lastIndexOf('.');
+  return pointIndex > -1 ? fileName.substring(pointIndex + 1, fileName.length) : 'doc';
+}
+
+export { cloneArray, extractFileExtension };
