@@ -13,7 +13,12 @@ const styles: Styles<Theme, {}, string> = {
     flexDirection: 'column',
   },
   nomeArquivo: {
-    maxWidth: 200,
+    maxWidth: 170,
+    marginLeft: 15,
+    marginRight: 15,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
     height: '100%',
     display: 'flex',
     justifyContent: 'center',

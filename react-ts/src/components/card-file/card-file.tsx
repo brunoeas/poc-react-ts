@@ -29,7 +29,7 @@ function CardFile(props: PropsType): JSX.Element {
         {/* TODO: testar com uma extensao que nao existe */}
       </div>
 
-      <div className={classes.nomeArquivo}>{file.nmArquivo}</div>
+      <p className={classes.nomeArquivo}>{file.nmArquivo}</p>
       {/* TODO: fazer estilo para cortar nome quando for mto grande */}
     </Paper>
   );
