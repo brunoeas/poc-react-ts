@@ -23,33 +23,28 @@ class FileApi {
    * Chama o endpoint para salvar um arquivo e setta as funções que manipulam os eventos de progresso
    *
    * @param {AxiosRequestParamsType} - Objeto com arquivo que vai ser enviado e funções para manipular os eventos de progresso
-   * @returns {Promise<void>}
+   * @returns {Promise<AxiosResponse<ArquivoModel>>} - Promise com a resposta da request com o objeto do arquivo salvo
    */
   public async saveFile({
     body,
     onUploadProgress,
-    onDownloadProgress,
   }: AxiosRequestParamsType): Promise<AxiosResponse<ArquivoModel>> {
     const data = new FormData();
     data.append('file', body.fileData, body.nmArquivo);
-    return axios.post(`${this.API}/${body.nmArquivo}`, data, { onUploadProgress, onDownloadProgress });
+    return axios.post(`${this.API}/${body.nmArquivo}`, data, { onUploadProgress });
   }
 
   /**
-   * Chama o endpoint para salvar um arquivo e setta as funções que manipulam os eventos de progresso
+   * Chama o endpoint para buscar uma lista de tamanho pré definido de arquivos
    *
-   * @param {AxiosRequestParamsType} - Objeto com arquivo que vai ser enviado e funções para manipular os eventos de progresso
-   * @returns {Promise<ArquivoModel[]>}
+   * @param {AxiosRequestParamsType} - Objeto com as definições do tamanho da lista
+   * @returns {Promise<AxiosResponse<ArquivoModel[]>>} - Promise com a resposta da request com a lista de arquivos
    */
-  public async findPartOfFiles({
-    body: { firstIndex, qtdMaxItens },
-    onUploadProgress,
-    onDownloadProgress,
-  }: AxiosRequestParamsType): Promise<ArquivoModel[]> {
-    return axios.get(
-      `${this.API}?firstIndex=${firstIndex}${qtdMaxItens ? `&qtdMaxItens=${qtdMaxItens}` : ''}`,
-      { onUploadProgress, onDownloadProgress }
-    );
+  public async findPartOfFiles(
+    params: AxiosRequestParamsType = { body: { firstIndex: 0, qtdMaxItens: 20 } }
+  ): Promise<AxiosResponse<ArquivoModel[]>> {
+    const { firstIndex, qtdMaxItens } = params.body;
+    return axios.get(`${this.API}?firstIndex=${firstIndex}&qtdMaxItens=${qtdMaxItens}`);
   }
 }
 

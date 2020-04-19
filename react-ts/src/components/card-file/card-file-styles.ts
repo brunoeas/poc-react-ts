@@ -11,19 +11,22 @@ const styles: Styles<Theme, {}, string> = {
     margin: 15,
     display: 'flex',
     flexDirection: 'column',
+    cursor: 'pointer',
   },
-  nomeArquivo: {
-    maxWidth: 170,
+  containerNomeArquivo: {
     marginLeft: 15,
     marginRight: 15,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
     height: '100%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'flex-end',
     paddingBottom: 10,
+  },
+  nomeArquivo: {
+    maxWidth: 170,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   containerIconeArquivo: {
     display: 'flex',

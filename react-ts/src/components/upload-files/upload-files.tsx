@@ -10,6 +10,13 @@ type PropsType = {
   filesToUpload: ArquivoModel[];
 };
 
+/**
+ * Componente responsável por manipular o upload dos arquivos e a exibição do modal com os loadings
+ *
+ * @author Bruno Eduardo <bruno.soares@kepha.com.br>
+ * @param {PropsType} props - props
+ * @returns {JSX.Element}
+ */
 function UploadFiles(props: PropsType): JSX.Element {
   const fileApi = new FileApi();
 

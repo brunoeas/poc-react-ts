@@ -26,11 +26,11 @@ function CardFile(props: PropsType): JSX.Element {
     <Paper elevation={8} className={classes.container}>
       <div className={classes.containerIconeArquivo}>
         <FileIcon {...reactFileIcon.defaultStyles[extension]} extension={extension} size={120} />
-        {/* TODO: testar com uma extensao que nao existe */}
       </div>
 
-      <p className={classes.nomeArquivo}>{file.nmArquivo}</p>
-      {/* TODO: fazer estilo para cortar nome quando for mto grande */}
+      <div className={classes.containerNomeArquivo}>
+        <div className={classes.nomeArquivo}>{file.nmArquivo}</div>
+      </div>
     </Paper>
   );
 }

@@ -10,6 +10,13 @@ function cloneArray<T>(array: T[] = []): T[] {
   return [...array];
 }
 
+/**
+ * Extrai a extensão do arquivo pelo nome dele
+ *
+ * @author Bruno Eduardo <bruno.soares@kepha.com.br>
+ * @param {string} fileName - Nome do Arquivo
+ * @returns {string} Extensão do arquivo
+ */
 function extractFileExtension(fileName: string): string {
   const pointIndex = fileName.lastIndexOf('.');
   return pointIndex > -1 ? fileName.substring(pointIndex + 1, fileName.length) : 'doc';

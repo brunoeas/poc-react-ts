@@ -5,15 +5,22 @@ import ArquivoModel from '../../models/arquivo';
 import CardFile from '../../components/card-file/card-file';
 import SituacaoArquivoEnum from '../../enumeration/situacao-arquivo-enum';
 import UploadFiles from '../../components/upload-files/upload-files';
+import { Paper } from '@material-ui/core';
+import IconUpload from '@material-ui/icons/CloudUpload';
+import DropFilesModal from '../../components/drop-files-modal/drop-modal';
+import FileApi from '../../resources/file-api';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 type PropsType = { classes: any };
 type StateType = {
   files?: ArquivoModel[];
   filesToUpload?: ArquivoModel[];
+  draggingFile?: boolean;
+  loading?: boolean;
 };
 
 /**
- * Unica e principal tela do App
+ * Única e principal tela do App
  *
  * @author Bruno Eduardo <bruno.soares@kepha.com.br>
  * @class App
@@ -33,11 +40,13 @@ class App extends Component<PropsType, StateType> {
     files: [
       {
         idArquivo: 11,
-        nmArquivo: 'imag-asdasdasjdaasas-da-d-asd-asd-asdasdasd-asd-asd-as-dasdsdae.png',
+        nmArquivo: 'imag-asdasdasjdaasas-da-d-asd-asd-asdasdasd-asd-asd-as-dasdsdae.jpg',
         stArquivo: 2,
       },
     ],
     filesToUpload: [],
+    draggingFile: false,
+    loading: true,
   };
 
   /**
@@ -46,10 +55,29 @@ class App extends Component<PropsType, StateType> {
   private _isMounted = false;
 
   /**
+   * API dos arquivos
+   */
+  private fileApi = new FileApi();
+
+  /**
+   * Referência do input de arquivos
+   */
+  private inputFilesRef: HTMLInputElement | null = null;
+
+  /**
    * Marca o componente como montado
    */
   public componentDidMount() {
     this._isMounted = true;
+
+    this.fileApi
+      .findPartOfFiles()
+      .then((res) => this.safeSetState({ files: res.data, loading: false }))
+      .catch((err) =>
+        this.safeSetState({ loading: false }, () =>
+          console.log('> Ocorreu um erro ao buscar os arquivos: ', err)
+        )
+      );
   }
 
   /**
@@ -73,14 +101,16 @@ class App extends Component<PropsType, StateType> {
   }
 
   /**
-   * Recebe o evento de upload de arquivos, convertendo todos para ArquivoModel com seus devidos Base64 e inicia o upload para o servidor
+   * Recebe o evento de upload de arquivos e inicia o upload para o servidor
    *
-   * @param e - Event
+   * @param {React.DragEvent<HTMLDivElement> | React.ChangeEvent<HTMLInputElement>} e - Evento
+   * @param {FileList} files - Lista de arquivos
    */
-  private async onAddFiles(e: React.DragEvent<HTMLDivElement>) {
-    const files = e.dataTransfer.files;
-
-    if (files.length === 0) return;
+  private async onAddFiles(
+    e: React.DragEvent<HTMLDivElement> | React.ChangeEvent<HTMLInputElement>,
+    files: FileList | null
+  ) {
+    if (!files || files.length === 0) return;
     e.preventDefault();
 
     const auxFiles: ArquivoModel[] = Array.from(files).map((file, i) => ({
@@ -92,7 +122,7 @@ class App extends Component<PropsType, StateType> {
       nrLoaded: i === 0 ? 0 : undefined,
     }));
 
-    this.safeSetState({ filesToUpload: auxFiles });
+    this.safeSetState({ draggingFile: false, filesToUpload: auxFiles });
   }
 
   render() {
@@ -100,13 +130,49 @@ class App extends Component<PropsType, StateType> {
 
     return (
       <>
-        <div className={classes.main} onDrop={this.onAddFiles} onDragOver={(e) => e.preventDefault()}>
+        <DropFilesModal
+          show={this.state.draggingFile || false}
+          onDragLeave={() => this.state.draggingFile && this.safeSetState({ draggingFile: false })}
+          onDrop={(e) => this.onAddFiles(e, e.dataTransfer.files)}
+        />
+
+        {this.state.loading && <LinearProgress />}
+
+        <div
+          className={classes.main}
+          onDragOver={(e) => {
+            e.preventDefault();
+            !this.state.draggingFile && this.safeSetState({ draggingFile: true });
+          }}
+        >
           <div className={classes.title}>Meu banco de arquivos</div>
 
-          <hr />
-          {/* TODO: estilizar tag <hr> */}
+          <hr className={classes.linhaSeparadora} />
 
           <div className={classes.container}>
+            <input
+              accept='*'
+              className={classes.inputFile}
+              multiple
+              type='file'
+              ref={(ref) => (this.inputFilesRef = ref)}
+              onChange={(e) => this.onAddFiles(e, e.target.files)}
+            />
+
+            <Paper
+              onClick={() => this.inputFilesRef && this.inputFilesRef.click()}
+              elevation={8}
+              className={classes.containerItemUpload}
+            >
+              <div className={classes.iconeItemUpload}>
+                <IconUpload fontSize='inherit' color='inherit' />
+              </div>
+
+              <div className={classes.textoItemUpload}>
+                Clique aqui ou arraste os arquivos para fazer o upload
+              </div>
+            </Paper>
+
             {(this.state.files || []).map((file, i) => (
               <CardFile key={i} file={file} />
             ))}
@@ -116,7 +182,12 @@ class App extends Component<PropsType, StateType> {
         <UploadFiles
           filesToUpload={this.state.filesToUpload || []}
           onUploadEnd={(uploadedFiles) =>
-            this.safeSetState({ files: this.state.files?.concat(uploadedFiles), filesToUpload: [] })
+            this.safeSetState({
+              files: uploadedFiles
+                .filter((file) => file.stArquivo === SituacaoArquivoEnum.UPLOAD_CONCLUIDO_SUCESSO)
+                .concat(this.state.files || []),
+              filesToUpload: [],
+            })
           }
         />
       </>
