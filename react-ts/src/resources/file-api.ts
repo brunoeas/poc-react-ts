@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import ArquivoModel from '../models/arquivo';
+import PageModel from '../models/page';
 
 type AxiosRequestParamsType = {
   body?: any;
@@ -38,11 +39,11 @@ class FileApi {
    * Chama o endpoint para buscar uma lista de tamanho pré definido de arquivos
    *
    * @param {AxiosRequestParamsType} - Objeto com as definições do tamanho da lista
-   * @returns {Promise<AxiosResponse<ArquivoModel[]>>} - Promise com a resposta da request com a lista de arquivos
+   * @returns {Promise<AxiosResponse<PageModel<ArquivoModel>>>} - Promise com a resposta da request com a lista de arquivos
    */
   public async findPartOfFiles(
     params: AxiosRequestParamsType = { body: { firstIndex: 0, qtdMaxItens: 20 } }
-  ): Promise<AxiosResponse<ArquivoModel[]>> {
+  ): Promise<AxiosResponse<PageModel<ArquivoModel>>> {
     const { firstIndex, qtdMaxItens } = params.body;
     return axios.get(`${this.API}?firstIndex=${firstIndex}&qtdMaxItens=${qtdMaxItens}`);
   }

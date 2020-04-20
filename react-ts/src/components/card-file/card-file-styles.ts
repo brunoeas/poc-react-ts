@@ -12,6 +12,9 @@ const styles: Styles<Theme, {}, string> = {
     display: 'flex',
     flexDirection: 'column',
     cursor: 'pointer',
+    '& :hover #botao': {
+      display: 'block',
+    },
   },
   containerNomeArquivo: {
     marginLeft: 15,
@@ -34,6 +37,11 @@ const styles: Styles<Theme, {}, string> = {
     alignItems: 'center',
     padding: 15,
     paddingTop: 30,
+  },
+  containerDeleteButton: {
+    position: 'absolute',
+    right: 0,
+    zIndex: 9,
   },
 };
 

@@ -6,7 +6,7 @@ import { cloneArray } from '../../utils/utils';
 import FileApi from '../../resources/file-api';
 
 type PropsType = {
-  onUploadEnd: (uploadedFiles: ArquivoModel[]) => void;
+  onUploadEnd: () => void;
   filesToUpload: ArquivoModel[];
 };
 
@@ -153,7 +153,7 @@ function UploadFiles(props: PropsType): JSX.Element {
     if (files.length > 0 && !dialogIsOpen) {
       uploadAllFiles()
         .then(() => {
-          props.onUploadEnd(files);
+          props.onUploadEnd();
           setDialogIsOpen(false);
           setFiles([]);
         })

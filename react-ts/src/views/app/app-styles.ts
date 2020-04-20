@@ -9,23 +9,24 @@ const styles: Styles<Theme, {}, string> = {
     width: '100vw',
     height: '100vh',
     padding: 30,
+    paddingTop: 20,
     boxSizing: 'border-box',
   },
   title: {
     fontSize: '1.5rem',
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 15,
+  },
+  containerScroll: {
+    maxHeight: 'calc(100vh - 105px)',
   },
   container: {
     display: 'flex',
     flexDirection: 'row',
     flexWrap: 'wrap',
     overflow: 'hidden',
-    overflowY: 'auto',
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
-    maxHeight: 'calc(100vh - 105px)',
   },
   linhaSeparadora: {
     height: 1,
@@ -65,6 +66,31 @@ const styles: Styles<Theme, {}, string> = {
     display: 'none',
     width: 0,
     height: 0,
+  },
+  containerHeader: {
+    heigth: 40,
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  refreshButton: {
+    maxWidth: 75,
+    height: 40,
+  },
+  containerTitle: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  loadingLinear: {
+    position: 'absolute',
+    width: '100%',
+    top: 0,
+  },
+  contador: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start',
+    fontSize: '0.9rem',
   },
 };
 

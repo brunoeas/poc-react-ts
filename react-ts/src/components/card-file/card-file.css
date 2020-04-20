@@ -1,0 +1,7 @@
+.container-botao {
+  display: none;
+}
+
+.container-geral:hover .container-botao {
+  display: block;
+}

@@ -10,6 +10,10 @@ import IconUpload from '@material-ui/icons/CloudUpload';
 import DropFilesModal from '../../components/drop-files-modal/drop-modal';
 import FileApi from '../../resources/file-api';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import Grid from '@material-ui/core/Grid';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Button from '@material-ui/core/Button';
+import InfiniteScroll from 'react-infinite-scroller';
 
 type PropsType = { classes: any };
 type StateType = {
@@ -17,6 +21,8 @@ type StateType = {
   filesToUpload?: ArquivoModel[];
   draggingFile?: boolean;
   loading?: boolean;
+  page?: number;
+  countTotal?: number;
 };
 
 /**
@@ -31,22 +37,22 @@ class App extends Component<PropsType, StateType> {
     super(props);
     this.safeSetState = this.safeSetState.bind(this);
     this.onAddFiles = this.onAddFiles.bind(this);
+    this.findFiles = this.findFiles.bind(this);
+    this.hasMoreItems = this.hasMoreItems.bind(this);
+    this.refresh = this.refresh.bind(this);
+    this.deleteFile = this.deleteFile.bind(this);
   }
 
   /**
    * State
    */
   public state: StateType = {
-    files: [
-      {
-        idArquivo: 11,
-        nmArquivo: 'imag-asdasdasjdaasas-da-d-asd-asd-asdasdasd-asd-asd-as-dasdsdae.jpg',
-        stArquivo: 2,
-      },
-    ],
+    files: [],
     filesToUpload: [],
     draggingFile: false,
     loading: true,
+    page: 0,
+    countTotal: 0,
   };
 
   /**
@@ -69,15 +75,7 @@ class App extends Component<PropsType, StateType> {
    */
   public componentDidMount() {
     this._isMounted = true;
-
-    this.fileApi
-      .findPartOfFiles()
-      .then((res) => this.safeSetState({ files: res.data, loading: false }))
-      .catch((err) =>
-        this.safeSetState({ loading: false }, () =>
-          console.log('> Ocorreu um erro ao buscar os arquivos: ', err)
-        )
-      );
+    this.findFiles();
   }
 
   /**
@@ -125,6 +123,57 @@ class App extends Component<PropsType, StateType> {
     this.safeSetState({ draggingFile: false, filesToUpload: auxFiles });
   }
 
+  /**
+   * Busca os arquivos na base de dados com as configurações de paginação
+   *
+   * @param {number} [firstIndex=0] - Primeiro index da lista
+   * @param {number} [qtdMaxItens=20] - Quantidade máxima de items
+   * @param {number} [page=this.state.page || 0] - Página atual
+   */
+  private findFiles(
+    firstIndex: number = 0,
+    qtdMaxItens: number = 20,
+    page: number = this.state.page || 0
+  ) {
+    this.safeSetState({ loading: true, page }, () =>
+      this.fileApi
+        .findPartOfFiles({ body: { firstIndex, qtdMaxItens } })
+        .then((res) => {
+          const concatenedData = this.state.files?.concat(res.data.listData);
+          if (!concatenedData) return;
+
+          this.safeSetState({
+            files: concatenedData,
+            countTotal: res.data.countTotal,
+            loading: false,
+          });
+        })
+        .catch((err) =>
+          this.safeSetState({ loading: false }, () =>
+            console.error('> Ocorreu um erro ao buscar os arquivos: ', err)
+          )
+        )
+    );
+  }
+
+  private deleteFile(index: number) {}
+
+  /**
+   * Atualiza os arquivos na página e na quantidade que estavam
+   */
+  private refresh() {
+    this.safeSetState({ filesToUpload: [], files: [] }, () =>
+      this.findFiles(0, ((this.state.page || 0) + 1) * 20)
+    );
+  }
+
+  /**
+   * @returns true - se há mais dados ainda para serem buscados da API; false - caso não;
+   */
+  private hasMoreItems(): boolean {
+    return this.state.files !== undefined && this.state.files.length < (this.state.countTotal || 0);
+  }
+
   render() {
     const { classes } = this.props;
 
@@ -136,7 +185,9 @@ class App extends Component<PropsType, StateType> {
           onDrop={(e) => this.onAddFiles(e, e.dataTransfer.files)}
         />
 
-        {this.state.loading && <LinearProgress />}
+        {this.state.loading && <LinearProgress className={classes.loadingLinear} />}
+
+        <UploadFiles filesToUpload={this.state.filesToUpload || []} onUploadEnd={this.refresh} />
 
         <div
           className={classes.main}
@@ -145,51 +196,80 @@ class App extends Component<PropsType, StateType> {
             !this.state.draggingFile && this.safeSetState({ draggingFile: true });
           }}
         >
-          <div className={classes.title}>Meu banco de arquivos</div>
+          <Grid container className={classes.containerHeader}>
+            <Grid item xs={2} className={classes.contador}>
+              {`${this.state.files?.length} arquivos de ${this.state.countTotal}`}
+            </Grid>
+
+            <Grid item xs={3} />
+
+            <Grid item xs={3} className={classes.containerTitle}>
+              <div className={classes.title}>Meu banco de arquivos</div>
+            </Grid>
+
+            <Grid item xs={3} />
+
+            <Grid item xs={1}>
+              <Button
+                onClick={this.refresh}
+                variant={this.state.loading ? undefined : 'outlined'}
+                color='primary'
+                className={classes.refreshButton}
+              >
+                {this.state.loading ? <CircularProgress size={25} /> : 'Refresh'}
+              </Button>
+            </Grid>
+          </Grid>
 
           <hr className={classes.linhaSeparadora} />
 
-          <div className={classes.container}>
-            <input
-              accept='*'
-              className={classes.inputFile}
-              multiple
-              type='file'
-              ref={(ref) => (this.inputFilesRef = ref)}
-              onChange={(e) => this.onAddFiles(e, e.target.files)}
-            />
+          <input
+            accept='*'
+            className={classes.inputFile}
+            multiple
+            type='file'
+            ref={(ref) => (this.inputFilesRef = ref)}
+            onChange={(e) => this.onAddFiles(e, e.target.files)}
+          />
 
-            <Paper
-              onClick={() => this.inputFilesRef && this.inputFilesRef.click()}
-              elevation={8}
-              className={classes.containerItemUpload}
+          <div
+            style={{ overflowY: this.state.loading ? 'hidden' : 'auto' }}
+            className={classes.containerScroll}
+          >
+            <InfiniteScroll
+              className={classes.container}
+              pageStart={0}
+              loadMore={(page) => this.hasMoreItems() && this.findFiles(page * 20, 20, page)}
+              hasMore={this.state.files && this.state.files.length < (this.state.countTotal || 0)}
+              loader={
+                <div style={{ width: '100%', textAlign: 'center' }} key={0}>
+                  Loading...
+                </div>
+              }
+              useWindow={false}
+              initialLoad={false}
+              threshold={100}
             >
-              <div className={classes.iconeItemUpload}>
-                <IconUpload fontSize='inherit' color='inherit' />
-              </div>
+              <Paper
+                onClick={() => this.inputFilesRef && this.inputFilesRef.click()}
+                elevation={8}
+                className={classes.containerItemUpload}
+              >
+                <div className={classes.iconeItemUpload}>
+                  <IconUpload fontSize='inherit' color='inherit' />
+                </div>
 
-              <div className={classes.textoItemUpload}>
-                Clique aqui ou arraste os arquivos para fazer o upload
-              </div>
-            </Paper>
+                <div className={classes.textoItemUpload}>
+                  Clique aqui ou arraste os arquivos para fazer o upload
+                </div>
+              </Paper>
 
-            {(this.state.files || []).map((file, i) => (
-              <CardFile key={i} file={file} />
-            ))}
+              {(this.state.files || []).map((file, i) => (
+                <CardFile key={i} file={file} onDelete={() => this.deleteFile(i)} />
+              ))}
+            </InfiniteScroll>
           </div>
         </div>
-
-        <UploadFiles
-          filesToUpload={this.state.filesToUpload || []}
-          onUploadEnd={(uploadedFiles) =>
-            this.safeSetState({
-              files: uploadedFiles
-                .filter((file) => file.stArquivo === SituacaoArquivoEnum.UPLOAD_CONCLUIDO_SUCESSO)
-                .concat(this.state.files || []),
-              filesToUpload: [],
-            })
-          }
-        />
       </>
     );
   }

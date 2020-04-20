@@ -11,7 +11,7 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import ErrorIcon from '@material-ui/icons/Error';
 import ClockIcon from '@material-ui/icons/AccessTime';
 import Tooltip from '@material-ui/core/Tooltip';
-import ProgressLoading from '../ProgressLoading/progress-loading';
+import ProgressLoading from '../progress-loading/progress-loading';
 
 type PropsType = {
   files: ArquivoModel[];
@@ -40,11 +40,7 @@ function UploadDialog(props: PropsType): JSX.Element {
             <ListItemIcon style={{ display: 'flex', justifyContent: 'center' }}>
               {(() => {
                 if (file.stArquivo === SituacaoArquivoEnum.FAZENDO_UPLOAD) {
-                  return (
-                    <Tooltip title='Carregando...'>
-                      <ProgressLoading loaded={file.nrLoaded || 0} />
-                    </Tooltip>
-                  );
+                  return <ProgressLoading loaded={file.nrLoaded || 0} />;
                 }
 
                 if (file.stArquivo === SituacaoArquivoEnum.UPLOAD_CONCLUIDO_SUCESSO) {
