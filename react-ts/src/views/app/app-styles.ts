@@ -1,5 +1,6 @@
 import { Styles } from '@material-ui/styles/withStyles';
 import { Theme } from '@material-ui/core/styles/createMuiTheme';
+import { createMuiTheme } from '@material-ui/core/styles';
 
 /**
  * Styles
@@ -92,6 +93,30 @@ const styles: Styles<Theme, {}, string> = {
     justifyContent: 'flex-start',
     fontSize: '0.9rem',
   },
+  containerSwal: {
+    width: 100,
+    height: 110,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 };
 
-export { styles };
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#474747',
+    },
+  },
+  overrides: {
+    MuiInput: {
+      underline: {
+        '&:hover:not($disabled):not($focused):not($error):before': {
+          borderBottomColor: '#474747',
+        },
+      },
+    },
+  },
+});
+
+export { styles, theme };

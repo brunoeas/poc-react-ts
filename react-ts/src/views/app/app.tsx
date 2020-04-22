@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { styles } from './app-styles';
+import { styles, theme } from './app-styles';
 import { withStyles } from '@material-ui/core/styles';
 import ArquivoModel from '../../models/arquivo';
 import CardFile from '../../components/card-file/card-file';
@@ -14,6 +14,11 @@ import Grid from '@material-ui/core/Grid';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button';
 import InfiniteScroll from 'react-infinite-scroller';
+import Sweetalert from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+
+const Swal = withReactContent(Sweetalert);
 
 type PropsType = { classes: any };
 type StateType = {
@@ -24,6 +29,11 @@ type StateType = {
   page?: number;
   countTotal?: number;
 };
+
+/**
+ * Quantidade de arquivos que vão ser exibidos por página
+ */
+const qtdItensParPage = 25;
 
 /**
  * Única e principal tela do App
@@ -127,17 +137,17 @@ class App extends Component<PropsType, StateType> {
    * Busca os arquivos na base de dados com as configurações de paginação
    *
    * @param {number} [firstIndex=0] - Primeiro index da lista
-   * @param {number} [qtdMaxItens=20] - Quantidade máxima de items
+   * @param {number} [qtdMaxItens=qtdItensParPage] - Quantidade máxima de items
    * @param {number} [page=this.state.page || 0] - Página atual
    */
   private findFiles(
     firstIndex: number = 0,
-    qtdMaxItens: number = 20,
+    qtdMaxItens: number = qtdItensParPage,
     page: number = this.state.page || 0
   ) {
     this.safeSetState({ loading: true, page }, () =>
       this.fileApi
-        .findPartOfFiles({ body: { firstIndex, qtdMaxItens } })
+        .findPartOfFiles({ params: { firstIndex, qtdMaxItens } })
         .then((res) => {
           const concatenedData = this.state.files?.concat(res.data.listData);
           if (!concatenedData) return;
@@ -156,14 +166,60 @@ class App extends Component<PropsType, StateType> {
     );
   }
 
-  private deleteFile(index: number) {}
+  /**
+   * Deleta um arquivo pelo seu ID
+   *
+   * @param {number} id - ID do arquivo
+   */
+  private async deleteFile(id: number) {
+    await new Promise((resolve) =>
+      this.safeSetState({ loading: true }, () => {
+        Swal.close();
+        Swal.fire({
+          title: (
+            <MuiThemeProvider theme={theme}>
+              <CircularProgress size={50} />
+            </MuiThemeProvider>
+          ),
+          customClass: {
+            title: this.props.classes.containerSwal,
+          },
+          showCancelButton: false,
+          showConfirmButton: false,
+          onOpen: resolve,
+        });
+      })
+    );
+
+    this.fileApi
+      .deleteArquivoById({ params: { id } })
+      .then(() =>
+        Swal.fire({
+          title: 'Sucesso!',
+          text: 'Arquivo excluído com sucesso',
+          icon: 'success',
+          onBeforeOpen: this.refresh,
+        })
+      )
+      .catch((err) =>
+        Swal.fire({
+          title: 'Erro!',
+          text: 'Ocorreu um erro ao excluír o arquivo',
+          icon: 'error',
+          onBeforeOpen: () => {
+            console.error('> Ocorreu um erro ao excluir um arquivo: ', err);
+            this.refresh();
+          },
+        })
+      );
+  }
 
   /**
    * Atualiza os arquivos na página e na quantidade que estavam
    */
   private refresh() {
     this.safeSetState({ filesToUpload: [], files: [] }, () =>
-      this.findFiles(0, ((this.state.page || 0) + 1) * 20)
+      this.findFiles(0, ((this.state.page || 0) + 1) * qtdItensParPage)
     );
   }
 
@@ -239,12 +295,18 @@ class App extends Component<PropsType, StateType> {
             <InfiniteScroll
               className={classes.container}
               pageStart={0}
-              loadMore={(page) => this.hasMoreItems() && this.findFiles(page * 20, 20, page)}
+              loadMore={(page) =>
+                this.hasMoreItems() && this.findFiles(page * qtdItensParPage, qtdItensParPage, page)
+              }
               hasMore={this.state.files && this.state.files.length < (this.state.countTotal || 0)}
               loader={
-                <div style={{ width: '100%', textAlign: 'center' }} key={0}>
-                  Loading...
-                </div>
+                this.state.loading ? (
+                  <div style={{ width: '100%', textAlign: 'center' }} key={0}>
+                    Carregando mais arquivos...
+                  </div>
+                ) : (
+                  <div key={0} />
+                )
               }
               useWindow={false}
               initialLoad={false}
@@ -265,7 +327,7 @@ class App extends Component<PropsType, StateType> {
               </Paper>
 
               {(this.state.files || []).map((file, i) => (
-                <CardFile key={i} file={file} onDelete={() => this.deleteFile(i)} />
+                <CardFile key={i} file={file} onDelete={() => this.deleteFile(file.idArquivo || -1)} />
               ))}
             </InfiniteScroll>
           </div>

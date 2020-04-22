@@ -15,11 +15,11 @@ function cloneArray<T>(array: T[] = []): T[] {
  *
  * @author Bruno Eduardo <bruno.soares@kepha.com.br>
  * @param {string} fileName - Nome do Arquivo
- * @returns {string} Extensão do arquivo
+ * @returns {string} Extensão do arquivo ou 'unknown' caso não tenha
  */
 function extractFileExtension(fileName: string): string {
   const pointIndex = fileName.lastIndexOf('.');
-  return pointIndex > -1 ? fileName.substring(pointIndex + 1, fileName.length) : 'doc';
+  return pointIndex > -1 ? fileName.substring(pointIndex + 1, fileName.length) : 'unknown';
 }
 
 export { cloneArray, extractFileExtension };
