@@ -3,7 +3,7 @@ import { styles } from './app-styles';
 import { withStyles } from '@material-ui/core/styles';
 import ArquivoModel from '../../models/arquivo';
 import CardFile from '../../components/card-file/card-file';
-import SituacaoArquivoEnum from '../../enumeration/situacao-arquivo-enum';
+import SituacaoArquivoEnum from '../../enumerations/situacao-arquivo-enum';
 import UploadFiles from '../../components/upload-files/upload-files';
 import { Paper } from '@material-ui/core';
 import IconUpload from '@material-ui/icons/CloudUpload';

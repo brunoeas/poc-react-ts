@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import UploadDialog from './upload-dialog';
 import ArquivoModel from '../../models/arquivo';
-import SituacaoArquivoEnum from '../../enumeration/situacao-arquivo-enum';
+import SituacaoArquivoEnum from '../../enumerations/situacao-arquivo-enum';
 import { cloneArray } from '../../utils/functions';
 import FileApi from '../../resources/file-api';
 import { Canceler } from 'axios';

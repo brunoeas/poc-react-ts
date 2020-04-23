@@ -6,7 +6,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
-import SituacaoArquivoEnum from '../../enumeration/situacao-arquivo-enum';
+import SituacaoArquivoEnum from '../../enumerations/situacao-arquivo-enum';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import ErrorIcon from '@material-ui/icons/Error';
 import ClockIcon from '@material-ui/icons/AccessTime';

@@ -1,4 +1,4 @@
-import SituacaoArquivoEnum from '../enumeration/situacao-arquivo-enum';
+import SituacaoArquivoEnum from '../enumerations/situacao-arquivo-enum';
 import { Canceler } from 'axios';
 
 /**
