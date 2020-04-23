@@ -22,7 +22,12 @@ enum SituacaoArquivoEnum {
   /**
    * Upload concluido com erro
    */
-  UPLOAD_CONCLUIDO_ERRO
+  UPLOAD_CONCLUIDO_ERRO,
+
+  /**
+   * O upload foi cancelado pelo usuário
+   */
+  UPLOAD_CANCELADO,
 }
 
 export default SituacaoArquivoEnum;

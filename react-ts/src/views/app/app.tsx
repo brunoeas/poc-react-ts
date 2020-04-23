@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { styles, theme } from './app-styles';
+import { styles } from './app-styles';
 import { withStyles } from '@material-ui/core/styles';
 import ArquivoModel from '../../models/arquivo';
 import CardFile from '../../components/card-file/card-file';
@@ -16,7 +16,7 @@ import Button from '@material-ui/core/Button';
 import InfiniteScroll from 'react-infinite-scroller';
 import Sweetalert from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import { MuiThemeProvider } from '@material-ui/core/styles';
+import LoadingSwal from '../../utils/loading-swal';
 
 const Swal = withReactContent(Sweetalert);
 
@@ -51,6 +51,7 @@ class App extends Component<PropsType, StateType> {
     this.hasMoreItems = this.hasMoreItems.bind(this);
     this.refresh = this.refresh.bind(this);
     this.deleteFile = this.deleteFile.bind(this);
+    this.downloadArquivoById = this.downloadArquivoById.bind(this);
   }
 
   /**
@@ -81,7 +82,7 @@ class App extends Component<PropsType, StateType> {
   private inputFilesRef: HTMLInputElement | null = null;
 
   /**
-   * Marca o componente como montado
+   * Marca o componente como montado e faz a primeira busca dos arquivos
    */
   public componentDidMount() {
     this._isMounted = true;
@@ -173,22 +174,7 @@ class App extends Component<PropsType, StateType> {
    */
   private async deleteFile(id: number) {
     await new Promise((resolve) =>
-      this.safeSetState({ loading: true }, () => {
-        Swal.close();
-        Swal.fire({
-          title: (
-            <MuiThemeProvider theme={theme}>
-              <CircularProgress size={50} />
-            </MuiThemeProvider>
-          ),
-          customClass: {
-            title: this.props.classes.containerSwal,
-          },
-          showCancelButton: false,
-          showConfirmButton: false,
-          onOpen: resolve,
-        });
-      })
+      this.safeSetState({ loading: true }, () => LoadingSwal({ configs: { onOpen: resolve } }))
     );
 
     this.fileApi
@@ -198,7 +184,6 @@ class App extends Component<PropsType, StateType> {
           title: 'Sucesso!',
           text: 'Arquivo excluído com sucesso',
           icon: 'success',
-          onBeforeOpen: this.refresh,
         })
       )
       .catch((err) =>
@@ -206,12 +191,10 @@ class App extends Component<PropsType, StateType> {
           title: 'Erro!',
           text: 'Ocorreu um erro ao excluír o arquivo',
           icon: 'error',
-          onBeforeOpen: () => {
-            console.error('> Ocorreu um erro ao excluir um arquivo: ', err);
-            this.refresh();
-          },
+          onBeforeOpen: () => console.error('> Ocorreu um erro ao excluir um arquivo: ', err),
         })
-      );
+      )
+      .finally(this.refresh);
   }
 
   /**
@@ -228,6 +211,16 @@ class App extends Component<PropsType, StateType> {
    */
   private hasMoreItems(): boolean {
     return this.state.files !== undefined && this.state.files.length < (this.state.countTotal || 0);
+  }
+
+  private downloadArquivoById(id: number) {
+    this.fileApi
+      .downloadFileById({
+        params: { id },
+        onDownloadProgress: (e) => console.log('onDownloadProgress: ', e),
+      })
+      .then((res) => console.log('acabo: ', res))
+      .catch((err) => console.error('Erro: ', err));
   }
 
   render() {
@@ -327,7 +320,12 @@ class App extends Component<PropsType, StateType> {
               </Paper>
 
               {(this.state.files || []).map((file, i) => (
-                <CardFile key={i} file={file} onDelete={() => this.deleteFile(file.idArquivo || -1)} />
+                <CardFile
+                  key={i}
+                  file={file}
+                  onDownload={() => this.downloadArquivoById(file.idArquivo || -1)}
+                  onDelete={() => this.deleteFile(file.idArquivo || -1)}
+                />
               ))}
             </InfiniteScroll>
           </div>

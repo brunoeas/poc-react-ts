@@ -12,6 +12,9 @@ import ErrorIcon from '@material-ui/icons/Error';
 import ClockIcon from '@material-ui/icons/AccessTime';
 import Tooltip from '@material-ui/core/Tooltip';
 import ProgressLoading from '../progress-loading/progress-loading';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import IconButton from '@material-ui/core/IconButton';
+import CancelIcon from '@material-ui/icons/Cancel';
 
 type PropsType = {
   files: ArquivoModel[];
@@ -36,7 +39,7 @@ function UploadDialog(props: PropsType): JSX.Element {
 
       <List>
         {files.map((file, i) => (
-          <ListItem button key={i}>
+          <ListItem key={i}>
             <ListItemIcon style={{ display: 'flex', justifyContent: 'center' }}>
               {(() => {
                 if (file.stArquivo === SituacaoArquivoEnum.FAZENDO_UPLOAD) {
@@ -53,7 +56,10 @@ function UploadDialog(props: PropsType): JSX.Element {
                   );
                 }
 
-                if (file.stArquivo === SituacaoArquivoEnum.UPLOAD_CONCLUIDO_ERRO) {
+                if (
+                  file.stArquivo === SituacaoArquivoEnum.UPLOAD_CONCLUIDO_ERRO ||
+                  file.stArquivo === SituacaoArquivoEnum.UPLOAD_CANCELADO
+                ) {
                   return (
                     <Tooltip title='Erro ao fazer upload'>
                       <div style={{ fontSize: 35 }}>
@@ -78,6 +84,14 @@ function UploadDialog(props: PropsType): JSX.Element {
             </ListItemIcon>
 
             <ListItemText primary={file.nmArquivo} />
+
+            {file.stArquivo === SituacaoArquivoEnum.FAZENDO_UPLOAD && file.cancelRequest && (
+              <ListItemSecondaryAction>
+                <IconButton onClick={() => file.cancelRequest && file.cancelRequest()} edge='end'>
+                  <CancelIcon />
+                </IconButton>
+              </ListItemSecondaryAction>
+            )}
           </ListItem>
         ))}
       </List>

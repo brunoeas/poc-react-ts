@@ -2,6 +2,7 @@ import React from 'react';
 import UploadCloudGif from '../../assets/images/cloud-upload.gif';
 import { styles } from './drop-modal-styles';
 import { withStyles } from '@material-ui/core/styles';
+import ReactDOM from 'react-dom';
 
 type PropsType = {
   classes: any;
@@ -20,8 +21,9 @@ type PropsType = {
 function DropFilesModal(props: PropsType): JSX.Element {
   const { classes, show, onDragLeave, onDrop } = props;
 
-  return show ? (
+  const component = (
     <div
+      style={{ display: show ? 'flex' : 'none' }}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
       onDragOver={(e) => e.preventDefault()}
@@ -33,8 +35,11 @@ function DropFilesModal(props: PropsType): JSX.Element {
         <div className={classes.text}>Solte o(s) arquivo(s) para fazer o upload</div>
       </div>
     </div>
-  ) : (
-    <></>
+  );
+
+  return ReactDOM.createPortal(
+    component,
+    document.getElementById('root') || document.createElement('div')
   );
 }
 

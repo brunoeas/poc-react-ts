@@ -1,4 +1,5 @@
 import SituacaoArquivoEnum from '../enumeration/situacao-arquivo-enum';
+import { Canceler } from 'axios';
 
 /**
  * Modelo de um Arquivo
@@ -36,6 +37,11 @@ interface Arquivo {
    * Porcentagem de quanto o arquivo fez upload
    */
   nrLoaded?: number;
+
+  /**
+   * Função que cancela a request de upload ou download
+   */
+  cancelRequest?: Canceler;
 }
 
 export default Arquivo;

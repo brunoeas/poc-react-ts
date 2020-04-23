@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import UploadDialog from './upload-dialog';
 import ArquivoModel from '../../models/arquivo';
 import SituacaoArquivoEnum from '../../enumeration/situacao-arquivo-enum';
-import { cloneArray } from '../../utils/utils';
+import { cloneArray } from '../../utils/functions';
 import FileApi from '../../resources/file-api';
+import { Canceler } from 'axios';
 
 type PropsType = {
   onUploadEnd: () => void;
@@ -34,6 +35,7 @@ function UploadFiles(props: PropsType): JSX.Element {
       const auxFiles: ArquivoModel[] = cloneArray(files);
       auxFiles[index].nrLoaded = undefined;
       auxFiles[index].fileData = undefined;
+      auxFiles[index].cancelRequest = undefined;
       auxFiles[index].stArquivo = SituacaoArquivoEnum.UPLOAD_CONCLUIDO_SUCESSO;
       auxFiles[index].idArquivo = data.idArquivo;
       auxFiles[index].dsBase64 = data.dsBase64;
@@ -64,6 +66,21 @@ function UploadFiles(props: PropsType): JSX.Element {
   );
 
   /**
+   * Setta a função para cancelar a request no objeto do arquivo
+   *
+   * @param {number} index - Index do arquivo
+   * @param {Canceler} cancelFunc - Função para cancelar a request de upload
+   */
+  const setCancelFunc = useCallback(
+    (index: number, cancelFunc: Canceler) => {
+      const auxFiles: ArquivoModel[] = cloneArray(files);
+      auxFiles[index].cancelRequest = cancelFunc;
+      setFiles(auxFiles);
+    },
+    [files]
+  );
+
+  /**
    * Faz o upload do arquivo passado por parâmetro com manipulação de eventos de progresso
    *
    * @param {ArquivoModel} arquivo - Arquivo que vai ser feito o upload
@@ -80,6 +97,7 @@ function UploadFiles(props: PropsType): JSX.Element {
         fileApi
           .saveFile({
             body: arquivo,
+            getCancelFunc: (cancelFunc) => setCancelFunc(index, cancelFunc),
             onUploadProgress: (event) => {
               if (!event.lengthComputable) {
                 return;
@@ -94,7 +112,7 @@ function UploadFiles(props: PropsType): JSX.Element {
           .catch(reject);
       });
     },
-    [fileApi, onUploadEnd, onUploadProgress]
+    [fileApi, onUploadEnd, onUploadProgress, setCancelFunc]
   );
 
   /**
@@ -108,6 +126,7 @@ function UploadFiles(props: PropsType): JSX.Element {
       console.error('> Ocorreu um erro ao fazer o upload: ', err);
 
       const auxFiles: ArquivoModel[] = cloneArray(files);
+      auxFiles[index].cancelRequest = undefined;
       auxFiles[index].nrLoaded = undefined;
       auxFiles[index].stArquivo = SituacaoArquivoEnum.UPLOAD_CONCLUIDO_ERRO;
       setFiles(auxFiles);
@@ -139,7 +158,7 @@ function UploadFiles(props: PropsType): JSX.Element {
             return Promise.resolve();
           }
 
-          return await uploadFile(currentFile, index);
+          await uploadFile(currentFile, index);
         })
         .catch((err) => onErrorUploading(err, index));
     };

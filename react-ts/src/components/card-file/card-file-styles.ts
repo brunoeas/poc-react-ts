@@ -11,10 +11,6 @@ const styles: Styles<Theme, {}, string> = {
     margin: 15,
     display: 'flex',
     flexDirection: 'column',
-    cursor: 'pointer',
-    '& :hover #botao': {
-      display: 'block',
-    },
   },
   containerNomeArquivo: {
     marginLeft: 15,
@@ -41,6 +37,11 @@ const styles: Styles<Theme, {}, string> = {
   containerDeleteButton: {
     position: 'absolute',
     right: 0,
+    zIndex: 9,
+  },
+  containerDownloadButton: {
+    position: 'absolute',
+    left: 0,
     zIndex: 9,
   },
 };

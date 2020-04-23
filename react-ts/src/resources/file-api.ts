@@ -1,6 +1,13 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse, AxiosInstance, Canceler } from 'axios';
 import ArquivoModel from '../models/arquivo';
 import PageModel from '../models/page';
+
+const CancelToken = axios.CancelToken;
+
+/**
+ * URL da API, hardcoded porque isso é uma POC ¯\_(ツ)_/¯
+ */
+const URL = 'http://localhost:2210/file';
 
 /**
  * Modelo dos parâmetros para as funções que fazem request pelo Axios
@@ -14,6 +21,7 @@ interface AxiosRequestParamsType<B, P> {
   params?: P;
   onUploadProgress?: (e: any) => void;
   onDownloadProgress?: (e: any) => void;
+  getCancelFunc?: (cancelFunc: Canceler) => void;
 }
 
 /**
@@ -24,9 +32,16 @@ interface AxiosRequestParamsType<B, P> {
  */
 class FileApi {
   /**
-   * URL da API
+   * Instância da API
    */
-  private API = 'http://localhost:2210/file';
+  private api: AxiosInstance;
+
+  /**
+   * Construtor padrão que cria uma instância da API
+   */
+  public constructor() {
+    this.api = axios.create({ baseURL: URL });
+  }
 
   /**
    * Chama o endpoint para salvar um arquivo e setta as funções que manipulam os eventos de progresso
@@ -37,10 +52,27 @@ class FileApi {
   public async saveFile({
     body,
     onUploadProgress,
+    getCancelFunc,
   }: AxiosRequestParamsType<ArquivoModel, void>): Promise<AxiosResponse<ArquivoModel>> {
     const data = new FormData();
     data.append('file', body?.fileData || '', body?.nmArquivo);
-    return axios.post(`${this.API}/${body?.nmArquivo}`, data, { onUploadProgress });
+    return this.api.post(`/${body?.nmArquivo}`, data, {
+      onUploadProgress,
+      cancelToken: getCancelFunc ? new CancelToken(getCancelFunc) : undefined,
+    });
+  }
+
+  /**
+   * Chama o endpoint para fazer o download de um arquivo pelo ID
+   *
+   * @param {AxiosRequestParamsType<void, { id: number }>} - Objeto com o ID do arquivo que vai ser feito o download
+   * @returns {Promise<AxiosResponse<any>>} - Promise com a resposta da request com o arquivo
+   */
+  public async downloadFileById(
+    args: AxiosRequestParamsType<void, { id: number }>
+  ): Promise<AxiosResponse<any>> {
+    const { params: { id } = {}, onDownloadProgress } = args;
+    return this.api.get(`/${id}`, { onDownloadProgress });
   }
 
   /**
@@ -50,10 +82,10 @@ class FileApi {
    * @returns {Promise<AxiosResponse<PageModel<ArquivoModel>>>} - Promise com a resposta da request com a lista de arquivos
    */
   public async findPartOfFiles(
-    params: AxiosRequestParamsType<void, { firstIndex: number; qtdMaxItens: number }>
+    args: AxiosRequestParamsType<void, { firstIndex: number; qtdMaxItens: number }>
   ): Promise<AxiosResponse<PageModel<ArquivoModel>>> {
-    const { firstIndex, qtdMaxItens } = params.params || {};
-    return axios.get(`${this.API}?firstIndex=${firstIndex}&qtdMaxItens=${qtdMaxItens}`);
+    const { firstIndex, qtdMaxItens } = args.params || {};
+    return this.api.get(`?firstIndex=${firstIndex}&qtdMaxItens=${qtdMaxItens}`);
   }
 
   /**
@@ -63,10 +95,10 @@ class FileApi {
    * @returns {Promise<AxiosResponse<void>>} - Promise com a resposta da request
    */
   public async deleteArquivoById(
-    param: AxiosRequestParamsType<void, { id: number }>
+    args: AxiosRequestParamsType<void, { id: number }>
   ): Promise<AxiosResponse<void>> {
-    const { id } = param.params || {};
-    return axios.delete(`${this.API}/${id}`);
+    const { id } = args.params || {};
+    return this.api.delete(`/${id}`);
   }
 }
 

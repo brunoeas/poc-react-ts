@@ -3,17 +3,17 @@ import ArquivoModel from '../../models/arquivo';
 import { Paper } from '@material-ui/core';
 import { styles } from './card-file-styles';
 import { withStyles } from '@material-ui/core/styles';
-import { extractFileExtension } from '../../utils/utils';
+import { extractFileExtension } from '../../utils/functions';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
+import DownloadIcon from '@material-ui/icons/GetApp';
 import './card-file.css';
 import Swal from 'sweetalert2';
 
 const ReactFileIcon = require('react-file-icon');
 const FileIcon = ReactFileIcon.default;
 
-type PropsType = { classes: any; file: ArquivoModel; onDelete: () => void };
-console.log(ReactFileIcon.defaultStyles, ReactFileIcon.defaultStyles['naoexisetr']);
+type PropsType = { classes: any; file: ArquivoModel; onDownload: () => void; onDelete: () => void };
 
 /**
  * Componente para exibir um Card com os dados de um arquivo
@@ -23,7 +23,7 @@ console.log(ReactFileIcon.defaultStyles, ReactFileIcon.defaultStyles['naoexisetr
  * @returns {JSX.Element}
  */
 function CardFile(props: PropsType): JSX.Element {
-  const { file, classes, onDelete } = props;
+  const { file, classes, onDownload, onDelete } = props;
 
   const extension = extractFileExtension(file.nmArquivo);
   let extensionConfigs = ReactFileIcon.defaultStyles[extension];
@@ -33,6 +33,12 @@ function CardFile(props: PropsType): JSX.Element {
 
   return (
     <Paper elevation={8} className={'container-geral ' + classes.container}>
+      <div className={'container-botao ' + classes.containerDownloadButton}>
+        <IconButton onClick={onClickDownload}>
+          <DownloadIcon />
+        </IconButton>
+      </div>
+
       <div className={'container-botao ' + classes.containerDeleteButton}>
         <IconButton onClick={onClickDelete}>
           <DeleteIcon />
@@ -65,6 +71,25 @@ function CardFile(props: PropsType): JSX.Element {
     }).then((result) => {
       if (result.value) {
         onDelete();
+      }
+    });
+  }
+
+  /**
+   * Abre o modal de confirmação para fazer o download do arquivo
+   */
+  function onClickDownload() {
+    Swal.fire({
+      title: 'Fazer download?',
+      text: `Deseja fazer download do arquivo "${file.nmArquivo}"?`,
+      icon: 'question',
+      showCancelButton: true,
+      cancelButtonColor: '#444444',
+      confirmButtonText: 'Sim',
+      cancelButtonText: 'Não',
+    }).then((result) => {
+      if (result.value) {
+        onDownload();
       }
     });
   }
