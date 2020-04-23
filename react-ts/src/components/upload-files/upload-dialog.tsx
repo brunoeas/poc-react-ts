@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import ArquivoModel from '../../models/arquivo';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -15,12 +16,14 @@ import ProgressLoading from '../progress-loading/progress-loading';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import IconButton from '@material-ui/core/IconButton';
 import CancelIcon from '@material-ui/icons/Cancel';
+import { styles } from './dialog-styles';
+import { withStyles } from '@material-ui/core/styles';
 
 type PropsType = {
   files: ArquivoModel[];
   dialogIsOpen: boolean;
   onCloseDialog: () => void;
-  classes?: any;
+  classes: any;
 };
 
 /**
@@ -31,16 +34,16 @@ type PropsType = {
  * @returns {JSX.Element}
  */
 function UploadDialog(props: PropsType): JSX.Element {
-  const { files, dialogIsOpen, onCloseDialog } = props;
+  const { classes, files, dialogIsOpen, onCloseDialog } = props;
 
-  return (
-    <Dialog onClose={onCloseDialog} open={dialogIsOpen}>
+  const component = (
+    <Dialog onClose={onCloseDialog} open={dialogIsOpen} disableBackdropClick>
       <DialogTitle>Fazendo upload...</DialogTitle>
 
       <List>
         {files.map((file, i) => (
-          <ListItem key={i}>
-            <ListItemIcon style={{ display: 'flex', justifyContent: 'center' }}>
+          <ListItem key={i} className={classes.containerItem}>
+            <ListItemIcon className={classes.containerItemIcon}>
               {(() => {
                 if (file.stArquivo === SituacaoArquivoEnum.FAZENDO_UPLOAD) {
                   return <ProgressLoading loaded={file.nrLoaded || 0} />;
@@ -49,7 +52,7 @@ function UploadDialog(props: PropsType): JSX.Element {
                 if (file.stArquivo === SituacaoArquivoEnum.UPLOAD_CONCLUIDO_SUCESSO) {
                   return (
                     <Tooltip title='Upload concluído com sucesso'>
-                      <div style={{ fontSize: 35, color: '#4CAF50' }}>
+                      <div className={classes.itemIcon} style={{ color: '#4CAF50' }}>
                         <CheckCircleIcon fontSize='inherit' color='inherit' />
                       </div>
                     </Tooltip>
@@ -61,8 +64,14 @@ function UploadDialog(props: PropsType): JSX.Element {
                   file.stArquivo === SituacaoArquivoEnum.UPLOAD_CANCELADO
                 ) {
                   return (
-                    <Tooltip title='Erro ao fazer upload'>
-                      <div style={{ fontSize: 35 }}>
+                    <Tooltip
+                      title={
+                        file.stArquivo === SituacaoArquivoEnum.UPLOAD_CANCELADO
+                          ? 'Upload cancelado'
+                          : 'Erro ao fazer upload'
+                      }
+                    >
+                      <div className={classes.itemIcon}>
                         <ErrorIcon fontSize='inherit' color='error' />
                       </div>
                     </Tooltip>
@@ -72,7 +81,7 @@ function UploadDialog(props: PropsType): JSX.Element {
                 if (file.stArquivo === SituacaoArquivoEnum.AGUARDANDO_PARA_UPLOAD) {
                   return (
                     <Tooltip title='Aguardando para fazer upload'>
-                      <div style={{ fontSize: 35 }}>
+                      <div className={classes.itemIcon}>
                         <ClockIcon fontSize='inherit' />
                       </div>
                     </Tooltip>
@@ -85,18 +94,23 @@ function UploadDialog(props: PropsType): JSX.Element {
 
             <ListItemText primary={file.nmArquivo} />
 
-            {file.stArquivo === SituacaoArquivoEnum.FAZENDO_UPLOAD && file.cancelRequest && (
-              <ListItemSecondaryAction>
+            <ListItemSecondaryAction className={classes.containerCancelButton}>
+              {file.stArquivo === SituacaoArquivoEnum.FAZENDO_UPLOAD && file.cancelRequest && (
                 <IconButton onClick={() => file.cancelRequest && file.cancelRequest()} edge='end'>
                   <CancelIcon />
                 </IconButton>
-              </ListItemSecondaryAction>
-            )}
+              )}
+            </ListItemSecondaryAction>
           </ListItem>
         ))}
       </List>
     </Dialog>
   );
+
+  return ReactDOM.createPortal(
+    component,
+    document.getElementById('root') || document.createElement('div')
+  );
 }
 
-export default UploadDialog;
+export default withStyles(styles)(UploadDialog);

@@ -71,8 +71,11 @@ class FileApi {
   public async downloadFileById(
     args: AxiosRequestParamsType<void, { id: number }>
   ): Promise<AxiosResponse<any>> {
-    const { params: { id } = {}, onDownloadProgress } = args;
-    return this.api.get(`/${id}`, { onDownloadProgress });
+    const { params: { id } = {}, onDownloadProgress, getCancelFunc } = args;
+    return this.api.get(`/${id}`, {
+      onDownloadProgress,
+      cancelToken: getCancelFunc ? new CancelToken(getCancelFunc) : undefined,
+    });
   }
 
   /**

@@ -1,24 +1,12 @@
 import React from 'react';
 import Sweetalert, { SweetAlertOptions, SweetAlertResult } from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import { MuiThemeProvider, makeStyles } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import { theme } from './constant';
 import CircularProgress, { CircularProgressProps } from '@material-ui/core/CircularProgress';
+import '../assets/styles/styles.css';
 
 const Swal = withReactContent(Sweetalert);
-
-/**
- * Estilos
- */
-const useStyles = makeStyles({
-  containerSwal: {
-    width: 100,
-    height: 110,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
 
 type LoadingSwalParams = {
   configs?: SweetAlertOptions;
@@ -30,11 +18,10 @@ type LoadingSwalParams = {
  *
  * @author Bruno Eduardo <bruno.soares@kepha.com.br>
  * @param {LoadingSwalParams} [props={}] - Props opcionais para customização
- * @returns {Promise<SweetAlertResult>} - Promise para case o modal tenha confirmação, por padrão não é necessário
+ * @returns {Promise<SweetAlertResult>} - Promise para caso o modal tenha confirmação, por padrão não é necessário
  */
 async function LoadingSwal(props: LoadingSwalParams = {}): Promise<SweetAlertResult> {
-  const classes = useStyles();
-  const { configs = {}, circularProgressProps } = props;
+  const { configs = {}, circularProgressProps = {} } = props;
 
   return Swal.fire({
     title: (
@@ -48,7 +35,7 @@ async function LoadingSwal(props: LoadingSwalParams = {}): Promise<SweetAlertRes
     showConfirmButton: false,
     ...configs,
     customClass: {
-      title: classes.containerSwal,
+      title: 'container-swal',
       ...configs.customClass,
     },
   });

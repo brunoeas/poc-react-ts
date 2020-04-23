@@ -246,18 +246,6 @@ class App extends Component<PropsType, StateType> {
           }}
         >
           <Grid container className={classes.containerHeader}>
-            <Grid item xs={2} className={classes.contador}>
-              {`${this.state.files?.length} arquivos de ${this.state.countTotal}`}
-            </Grid>
-
-            <Grid item xs={3} />
-
-            <Grid item xs={3} className={classes.containerTitle}>
-              <div className={classes.title}>Meu banco de arquivos</div>
-            </Grid>
-
-            <Grid item xs={3} />
-
             <Grid item xs={1}>
               <Button
                 onClick={this.refresh}
@@ -268,6 +256,18 @@ class App extends Component<PropsType, StateType> {
                 {this.state.loading ? <CircularProgress size={25} /> : 'Refresh'}
               </Button>
             </Grid>
+
+            <Grid item xs={2} className={classes.contador}>
+              {`${this.state.files?.length} arquivos de ${this.state.countTotal}`}
+            </Grid>
+
+            <Grid item xs={2} />
+
+            <Grid item xs={3} className={classes.containerTitle}>
+              <div className={classes.title}>Meu banco de arquivos</div>
+            </Grid>
+
+            <Grid item xs={4} />
           </Grid>
 
           <hr className={classes.linhaSeparadora} />

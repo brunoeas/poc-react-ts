@@ -91,6 +91,7 @@ const styles: Styles<Theme, {}, string> = {
     alignItems: 'flex-end',
     justifyContent: 'flex-start',
     fontSize: '0.9rem',
+    marginBottom: 10,
   },
 };
 

@@ -1,8 +1,8 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import UploadCloudGif from '../../assets/images/cloud-upload.gif';
 import { styles } from './drop-modal-styles';
 import { withStyles } from '@material-ui/core/styles';
-import ReactDOM from 'react-dom';
 
 type PropsType = {
   classes: any;
